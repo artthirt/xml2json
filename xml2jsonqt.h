@@ -7,9 +7,7 @@
 
 class Xml2JsonQt{
 public:
-
     void parseXml(const std::string &input, const std::string &output);
-
 };
 
 #endif
