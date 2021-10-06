@@ -31,6 +31,8 @@ endif()
 
 add_executable(xml2json
   main.cpp
+  xml2jsonqt.h
+  xml2jsonqt.cpp
 )
 
 if(${WITH_QT})
