@@ -5,19 +5,19 @@
 #include <iostream>
 #include <fstream>
 
+#include "xml2jsonqt.h"
+
 using namespace std;
-
-void parseXml(const string &input, const string &output);
-
-#ifdef WITH_QT
 
 void parseXml(const string &input, const string &output)
 {
+#ifdef WITH_QT
     Xml2JsonQt cnv;
     cnv.parseXml(input, output);
+#else
+#endif
 }
 
-#endif
 
 int main(int argc, char *argv[])
 {

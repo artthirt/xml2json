@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(xml2json LANGUAGES CXX)
 
-set(WITH_QT ON)
+set(WITH_QT CACHE BOOL ON)
 
 if(${WITH_QT})
 
@@ -25,14 +25,16 @@ if(${WITH_QT})
 
     add_definitions(-DWITH_QT)
 else()
-    find_package(Poco REQUIRED PocoXml)
-    find_package(Poco REQUIRED PocoJson)
+    find_package(Poco REQUIRED XML)
+    find_package(Poco REQUIRED JSON)
 endif()
 
 add_executable(xml2json
   main.cpp
   xml2jsonqt.h
   xml2jsonqt.cpp
+  xml2jsonpoco.h
+  xml2jsonpoco.cpp
 )
 
 if(${WITH_QT})
