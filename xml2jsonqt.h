@@ -3,7 +3,6 @@
 
 #ifdef WITH_QT
 
-#include <memory>
 #include <string>
 
 class Xml2JsonQt{
