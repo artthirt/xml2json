@@ -35,62 +35,6 @@ public:
     bool mDone = false;
     int mCurrentDepth = 0;
 
-#if 0
-
-    struct Stack{
-        string item;
-        string data;
-    };
-
-    list<string> path;
-    string data;
-    string item;
-    stack<Stack> _stack;
-
-    void processNode(xmlTextReaderPtr reader){
-        string key, value;
-        xmlChar* tmp;
-        xmlNode *node = xmlTextReaderCurrentNode(reader);
-        int depth = xmlTextReaderDepth(reader);
-        cout << node->type << endl;
-
-        if(node->type == 1){
-            key   = reinterpret_cast<const char*>( node->name );
-            path.push_back(key);
-            if(path.size() > depth){
-                _stack.push({item, data});
-                data = "";
-            }
-        }
-        if(node->type == 3){
-            value = reinterpret_cast<const char*>( node->content );
-            trim(value);
-            this->data = value;
-        }
-        if(node->type == 15){
-            key   = reinterpret_cast<const char*>( node->name );
-            if(path.size() == depth){
-                string item = this->item;
-                if(item.empty()){
-                    item = data;
-                }
-            }
-            if(_stack.size()){
-                string data = this->data;
-                string item = this->item;
-                this->item = _stack.top().item;
-                this->data = _stack.top().data;
-                _stack.pop();
-            }else{
-                this->item = "";
-                this->data = "";
-            }
-            path.pop_back();
-        }
-    }
-
-#else
-
     void processNode(xmlNodePtr node, vmap& params, int depth = 0, const std::string& parent = ""){
         string key, value, attrName, attrValue;
         vmap attrs;
@@ -150,7 +94,6 @@ public:
             }
         }
     }
-#endif
 
     void writeJson(const string& output){
         Json::Value root;
@@ -256,7 +199,6 @@ public:
     void parseXmlThr(const std::string &input, const std::string &output)
     {
         xmlInitParser();
-#if 1
         auto doc = xmlParseFile(input.c_str());
         if(!doc){
             cout << "can not parse file\n";
@@ -268,24 +210,9 @@ public:
         processNode(root_element, params);
 
         xmlFreeDoc(doc);
-#else
-        xmlTextReaderPtr reader = xmlReaderForFile(input.c_str(), nullptr, 0);
-
-        int ret = xmlTextReaderRead(reader);
-        while(ret == 1){
-            processNode(reader);
-            ret = xmlTextReaderRead(reader);
-        }
-        xmlFreeTextReader(reader);
-#endif
         xmlCleanupParser();
 
         mDone = true;
-    }
-
-    void parseDom(const Val &node, vmap &out)
-    {
-
     }
 
     void parseXml(const std::string &input, const std::string &output)
