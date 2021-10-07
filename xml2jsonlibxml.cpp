@@ -20,10 +20,11 @@
 using namespace std;
 
 struct Val{
+    enum Type{NOCHANGE, IN, OUT};
     string key;
     string value;
     int depth;
-    int in;
+    Type state;
     vmap attrs;
 };
 
@@ -51,7 +52,7 @@ public:
 #ifdef TEST
                     params[key] = value;
 #endif
-                    mQueue.push({key, value, depth, 0});
+                    mQueue.push({key, value, depth, Val::NOCHANGE});
                 }
 
                 xmlAttr* attribute = it->properties;
@@ -68,7 +69,7 @@ public:
             }
 
             if(it->children && value.empty()){
-                mQueue.push({key, "", depth, 1});
+                mQueue.push({key, "", depth, Val::IN});
 
                 vmap params2;
                 auto lst = params[key].toList();
@@ -90,7 +91,7 @@ public:
                     params[key] = params2;
                 }
 #endif
-                mQueue.push({key, "", depth, 2, attrs});
+                mQueue.push({key, "", depth, Val::OUT, attrs});
             }
         }
     }
@@ -111,10 +112,10 @@ public:
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 continue;
             }
-            auto Val = mQueue.front();
+            auto val = mQueue.front();
             mQueue.pop();
 
-            if(Val.in == 1){
+            if(val.state == Val::IN){
 #ifdef TEST
                 vmap m;
                 _stack.push(m);
@@ -122,7 +123,7 @@ public:
                 Json::Value j;
                 jstack.push(j);
             }
-            if(Val.in == 2){
+            if(val.state == Val::OUT){
 #ifdef TEST
                 /// test code
                 vmap t = _stack.top();
@@ -148,16 +149,16 @@ public:
                 jstack.pop();
                 auto& jtn = jstack.top();
 
-                if(!Val.attrs.empty()){
-                    for(auto it: Val.attrs){
+                if(!val.attrs.empty()){
+                    for(auto it: val.attrs){
                         jt[it.first] = it.second.toText();
                     }
                 }
 
-                if(!jtn[Val.key]){
-                    jtn[Val.key] = jt;
+                if(!jtn[val.key]){
+                    jtn[val.key] = jt;
                 }else{
-                    auto obj = jtn[Val.key];
+                    auto obj = jtn[val.key];
                     if(obj.isArray()){
                         obj[obj.size()] = jt;
                     }else{
@@ -166,17 +167,17 @@ public:
                         arr[1] = jt;
                         obj = arr;
                     }
-                    jtn[Val.key] = obj;
+                    jtn[val.key] = obj;
                 }
             }
 
-            if(!Val.value.empty()){
+            if(!val.value.empty()){
 #ifdef TEST
                 vmap& t = _stack.top();
                 t[Val.key] = Val.value;
 #endif
                 auto& jt = jstack.top();
-                jt[Val.key] = Val.value;
+                jt[val.key] = val.value;
             }else{
 
             }
