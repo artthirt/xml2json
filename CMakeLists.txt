@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 project(xml2json LANGUAGES CXX)
 
 set(WITH_QT CACHE BOOL ON)
+set(WITH_POCO CACHE BOOL OFF)
 
 if(${WITH_QT})
 
@@ -17,6 +18,7 @@ endif()
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(LIBS "")
 
 if(${WITH_QT})
     find_package(QT NAMES Qt6 Qt5 COMPONENTS Core REQUIRED)
@@ -25,20 +27,35 @@ if(${WITH_QT})
 
     add_definitions(-DWITH_QT)
 else()
-    find_package(Poco REQUIRED XML)
-    find_package(Poco REQUIRED JSON)
+    if(${WITH_POCO})
+        find_package(Poco REQUIRED XML)
+        find_package(Poco REQUIRED JSON)
+        add_definitions(-DWITH_POCO)
+        include_directories(${POCO_INCLUDE_DIR})
+        message(STATUS "poco " ${POCO_INCLUDE_DIR})
+    else()
+        find_package(LibXml2 REQUIRED)
+        set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} -ljsoncpp)
+        include_directories(${LIBXML2_INCLUDE_DIR})
+        message(STATUS "libxml2 " ${LIBXML2_INCLUDE_DIR})
+    endif()
 endif()
 
 add_executable(xml2json
   main.cpp
+  common.h
   xml2jsonqt.h
   xml2jsonqt.cpp
   xml2jsonpoco.h
   xml2jsonpoco.cpp
+  xml2jsonlibxml.h
+  xml2jsonlibxml.cpp
 )
 
 if(${WITH_QT})
     target_link_libraries(xml2json Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Xml)
+elseif(${WITH_POCO})
+    target_link_libraries(xml2json PUBLIC Poco::XML)
 else()
-    target_link_libraries(xml2json )
+    target_link_libraries(xml2json ${LIBS})
 endif()

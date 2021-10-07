@@ -6,6 +6,8 @@
 #include <fstream>
 
 #include "xml2jsonqt.h"
+#include "xml2jsonpoco.h"
+#include "xml2jsonlibxml.h"
 
 using namespace std;
 
@@ -13,9 +15,12 @@ void parseXml(const string &input, const string &output)
 {
 #ifdef WITH_QT
     Xml2JsonQt cnv;
-    cnv.parseXml(input, output);
+#elif WITH_POCO
+    Xml2JsonPoco cnv;
 #else
+    Xml2JsonLibxml cnv;
 #endif
+    cnv.parseXml(input, output);
 }
 
 

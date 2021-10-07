@@ -3,7 +3,7 @@
 
 #include <string>
 
-#ifndef WITH_QT
+#ifdef WITH_POCO
 
 class Xml2JsonPoco
 {
