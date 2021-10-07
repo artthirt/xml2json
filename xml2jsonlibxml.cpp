@@ -7,6 +7,7 @@
 #include <functional>
 #include <stack>
 #include <fstream>
+#include <mutex>
 
 #if !defined(WITH_QT) && !defined(WITH_POCO)
 
@@ -35,6 +36,7 @@ public:
     queue< Val > mQueue;
     bool mDone = false;
     int mCurrentDepth = 0;
+    mutex mMutex;
 
     void processNode(xmlNodePtr node, vmap& params, int depth = 0, const std::string& parent = ""){
         string key, value, attrName, attrValue;
@@ -52,6 +54,7 @@ public:
 #ifdef TEST
                     params[key] = value;
 #endif
+                    lock_guard<mutex> lock(mMutex);
                     mQueue.push({key, value, depth, Val::NOCHANGE});
                 }
 
@@ -69,7 +72,10 @@ public:
             }
 
             if(it->children && value.empty()){
-                mQueue.push({key, "", depth, Val::IN});
+                {
+                    lock_guard<mutex> lock(mMutex);
+                    mQueue.push({key, "", depth, Val::IN});
+                }
 
                 vmap params2;
                 auto lst = params[key].toList();
@@ -91,7 +97,10 @@ public:
                     params[key] = params2;
                 }
 #endif
-                mQueue.push({key, "", depth, Val::OUT, attrs});
+                {
+                    lock_guard<mutex> lock(mMutex);
+                    mQueue.push({key, "", depth, Val::OUT, attrs});
+                }
             }
         }
     }
@@ -112,8 +121,10 @@ public:
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 continue;
             }
+            mMutex.lock();
             auto val = mQueue.front();
             mQueue.pop();
+            mMutex.unlock();
 
             if(val.state == Val::IN){
 #ifdef TEST
