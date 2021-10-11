@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.14)
 
 project(xml2json LANGUAGES CXX)
 
-set(WITH_QT CACHE BOOL ON)
+# using qt
+set(WITH_QT CACHE BOOL OFF)
+# using poco (not yet realized)
 set(WITH_POCO CACHE BOOL OFF)
 
 if(${WITH_QT})
@@ -34,7 +36,9 @@ else()
         include_directories(${POCO_INCLUDE_DIR})
         message(STATUS "poco " ${POCO_INCLUDE_DIR})
     else()
+        # by default using libxml2 and jsoncpp
         find_package(LibXml2 REQUIRED)
+        find_package(jsoncpp REQUIRED)
         set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} -ljsoncpp)
         include_directories(${LIBXML2_INCLUDE_DIR})
         message(STATUS "libxml2 " ${LIBXML2_INCLUDE_DIR})

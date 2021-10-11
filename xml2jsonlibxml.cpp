@@ -48,7 +48,7 @@ public:
                 value = reinterpret_cast<const char*>(xval);
                 xmlFree(xval);
 
-                trim(value);
+                trim(value); // remove \n or \r
 
                 if(!value.empty()){
 #ifdef TEST
@@ -74,7 +74,7 @@ public:
             if(it->children && value.empty()){
                 {
                     lock_guard<mutex> lock(mMutex);
-                    mQueue.push({key, "", depth, Val::IN});
+                    mQueue.push({key, "", depth, Val::IN}); // go deeper
                 }
 
                 vmap params2;
@@ -99,7 +99,7 @@ public:
 #endif
                 {
                     lock_guard<mutex> lock(mMutex);
-                    mQueue.push({key, "", depth, Val::OUT, attrs});
+                    mQueue.push({key, "", depth, Val::OUT, attrs}); // out of children node
                 }
             }
         }
@@ -169,6 +169,7 @@ public:
                 if(!jtn[val.key]){
                     jtn[val.key] = jt;
                 }else{
+                    // if key exists then need to create array
                     auto obj = jtn[val.key];
                     if(obj.isArray()){
                         obj[obj.size()] = jt;
