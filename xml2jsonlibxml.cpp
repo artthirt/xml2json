@@ -20,15 +20,6 @@
 
 using namespace std;
 
-struct Val{
-    enum Type{NOCHANGE, IN, OUT};
-    string key;
-    string value;
-    int depth;
-    Type state;
-    vmap attrs;
-};
-
 #if !defined(WITH_QT) && !defined(WITH_POCO)
 
 class Xml2JsonLibxmlPrivate{

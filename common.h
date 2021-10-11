@@ -72,6 +72,15 @@ private:
 typedef Variant::vmap vmap;
 typedef Variant::vlist vlist;
 
+struct Val{
+    enum Type{NOCHANGE, IN, OUT};
+    std::string key;
+    std::string value;
+    int depth;
+    Type state;
+    vmap attrs;
+};
+
 #include <algorithm>
 
 // trim from start (in place)
